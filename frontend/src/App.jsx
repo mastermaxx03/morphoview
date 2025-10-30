@@ -1,9 +1,25 @@
-import "./App.css";
-
+import Logo from "./components/Logo";
+import Magnifier from "./Magnifier";
 function App() {
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-50">
-      <h1 className="text-4xl font-semibold text-blue-600">MorphoView 🧬</h1>
+    <div>
+      <Magnifier />
+      <div className="min-h-screen bg-white">
+        {/* Header */}
+        <header className="flex items-center justify-between p-4 shadow-sm">
+          <Logo />
+        </header>
+
+        {/* Main Content (you can build on this later) */}
+        <main className="p-8">
+          <h2 className="text-xl font-semibold text-gray-600">
+            Welcome to MorphoView 🧬
+          </h2>
+          <p className="text-gray-500 mt-2">
+            Upload and visualize your digital pathology slides here.
+          </p>
+        </main>
+      </div>
     </div>
   );
 }
