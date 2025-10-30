@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import "./Header.css";
-import Logo from "./Logo.jsx";
+import Logo from "./Logo";
 const Header = ({ onRoleSelect }) => {
   const [activeRole, setActiveRole] = useState(null);
 
