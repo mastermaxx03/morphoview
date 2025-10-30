@@ -1,10 +1,11 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import os
+import uuid
 
 app = FastAPI()
 
-# Allow React frontend to talk to backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,17 +17,31 @@ app.add_middleware(
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Serve uploaded files
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 @app.post("/upload")
 async def upload_slide(file: UploadFile = File(...)):
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    # Generate unique ID
+    file_id = str(uuid.uuid4())
+    file_extension = os.path.splitext(file.filename)[1]
+    saved_filename = f"{file_id}{file_extension}"
+    
+    file_path = os.path.join(UPLOAD_FOLDER, saved_filename)
     with open(file_path, "wb") as f:
         f.write(await file.read())
-    return {"filename": file.filename}
+    
+    return {
+        "file_id": file_id,
+        "filename": file.filename,
+        "saved_as": saved_filename,  # Frontend needs this
+    }
 
 @app.get("/slides")
 async def list_slides():
     slides = os.listdir(UPLOAD_FOLDER)
     return {"slides": slides}
+
 @app.get("/")
 async def root():
     return {"message": "MorphoView backend is running!"}

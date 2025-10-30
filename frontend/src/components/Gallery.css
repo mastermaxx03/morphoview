@@ -1,0 +1,168 @@
+.gallery {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.gallery h2 {
+  font-size: 20px;
+  color: #6b7280;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.queue-item {
+  display: grid;
+  grid-template-columns: 8px 80px 1fr 100px 200px;
+  gap: 16px;
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s;
+}
+
+.queue-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Priority Bar */
+.priority-bar {
+  width: 8px;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.priority-bar.priority-urgent {
+  background: #ef4444;
+}
+
+.priority-bar.priority-normal {
+  background: #f59e0b;
+}
+
+.priority-bar.priority-low {
+  background: #10b981;
+}
+
+/* Slide ID */
+.slide-id {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Preview */
+.slide-preview {
+  position: relative;
+  width: 100%;
+  height: 100px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(4px);
+  opacity: 0.3;
+}
+
+.scan-status {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner-small {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6b7280;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.scan-status span {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Barcode */
+.barcode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.barcode-lines {
+  width: 60px;
+  height: 40px;
+  background: repeating-linear-gradient(
+    90deg,
+    #000 0px,
+    #000 2px,
+    transparent 2px,
+    transparent 4px
+  );
+  border: 1px solid #e5e7eb;
+}
+
+.barcode span {
+  font-size: 12px;
+  color: #6b7280;
+  font-family: monospace;
+}
+
+/* Actions */
+.queue-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+.action-btn.cancel:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: #fee;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,14 @@
+.app {
+  min-height: 100vh;
+  background: white;
+}
+
+.app-header {
+  background: #000;
+  padding: 16px 32px;
+  border-bottom: 1px solid #333;
+}
+
+main {
+  min-height: calc(100vh - 80px);
+}
