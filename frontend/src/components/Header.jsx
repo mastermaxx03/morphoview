@@ -11,17 +11,19 @@ const Header = ({ onRoleSelect }) => {
   };
 
   return (
-    <header className="header">
-      <div className="header-left">
+    <header className="flex justify-between items-center px-6 py-4 bg-black border-b border-gray-800">
+      <div className="flex items-center">
         <Logo />
-        <h1 className="app-name">MorphoView</h1>
+        <h1 className="text-xl font-bold text-white">
+          MorphoView - AI-assisted pathology slide viewer
+        </h1>
       </div>
 
-      <div className="header-right">
+      <div className="flex gap-3">
         <Button
           variant={activeRole === "pathologist" ? "default" : "outline"}
           onClick={() => handleRoleClick("pathologist")}
-          className="role-btn"
+          className="bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
         >
           👨‍⚕️ Pathologist
         </Button>
@@ -29,7 +31,7 @@ const Header = ({ onRoleSelect }) => {
         <Button
           variant={activeRole === "engineer" ? "default" : "outline"}
           onClick={() => handleRoleClick("engineer")}
-          className="role-btn"
+          className="bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
         >
           🤖 Engineer
         </Button>
@@ -37,5 +39,4 @@ const Header = ({ onRoleSelect }) => {
     </header>
   );
 };
-
 export default Header;
