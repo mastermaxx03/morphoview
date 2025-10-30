@@ -45,3 +45,16 @@ async def list_slides():
 @app.get("/")
 async def root():
     return {"message": "MorphoView backend is running!"}
+@app.delete("/upload/{file_id}")
+async def delete_slide(file_id: str):
+    try:
+        # Find file with this ID
+        for file in os.listdir(UPLOAD_FOLDER):
+            if file.startswith(file_id):
+                file_path = os.path.join(UPLOAD_FOLDER, file)
+                os.remove(file_path)
+                return {"success": True, "message": f"Deleted {file}"}
+        
+        return {"success": False, "message": "File not found"}
+    except Exception as e:
+        return {"success": False, "message": str(e)}

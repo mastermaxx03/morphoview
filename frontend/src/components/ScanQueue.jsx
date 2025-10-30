@@ -62,7 +62,16 @@ const ScanQueue = ({ slides, setSlides }) => {
       return () => clearInterval(progressTimer);
     }
   }, [currentlyScanning, setSlides]);
-
+  const handleDelete = (slideId) => {
+    fetch(`http://localhost:8000/upload/${slideId}`, { method: "DELETE" })
+      .then((res) => res.json())
+      .then(() => {
+        setSlides((prevSlides) =>
+          prevSlides.filter((s) => s.file_id !== slideId)
+        );
+      })
+      .catch((err) => console.error("Delete failed:", err));
+  };
   const handlePrioritise = (slideId) => {
     setSlides((prevSlides) =>
       prevSlides.map((s) =>
@@ -167,6 +176,12 @@ const ScanQueue = ({ slides, setSlides }) => {
                 <h3>{slide.filename}</h3>
                 <span className="status-complete">✓ Complete</span>
                 <button className="view-btn">View Slide</button>
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDelete(slide.file_id)}
+                >
+                  🗑️ Delete
+                </button>
               </div>
             </div>
           ))}
