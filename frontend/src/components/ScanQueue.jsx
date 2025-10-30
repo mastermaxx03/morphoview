@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import ImagePreviewModal from "./ImagePreviewModal";
+
 import "./ScanQueue.css";
 
 const ScanQueue = ({ slides, setSlides }) => {
   const [currentlyScanning, setCurrentlyScanning] = useState(null);
   const [scanProgress, setScanProgress] = useState(0);
+  const [selectedSlide, setSelectedSlide] = useState(null);
 
   // Auto-scan logic
   useEffect(() => {
@@ -174,19 +177,38 @@ const ScanQueue = ({ slides, setSlides }) => {
               </div>
               <div className="completed-info">
                 <h3>{slide.filename}</h3>
-                <span className="status-complete">✓ Complete</span>
-                <button className="view-btn">View Slide</button>
-                <button
-                  className="delete-btn"
-                  onClick={() => handleDelete(slide.file_id)}
-                >
-                  🗑️ Delete
-                </button>
+
+                {/* Priority Badge */}
+                <span className={`priority-badge priority-${slide.priority}`}>
+                  {slide.priority === "urgent" && "🔴 URGENT"}
+                  {slide.priority === "normal" && "🟡 NORMAL"}
+                  {slide.priority === "low" && "🟢 LOW"}
+                </span>
+
+                <div className="card-actions">
+                  <button
+                    className="view-btn"
+                    onClick={() => setSelectedSlide(slide)}
+                  >
+                    View Slide
+                  </button>
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDelete(slide.file_id)}
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+      <ImagePreviewModal
+        slide={selectedSlide}
+        isOpen={!!selectedSlide}
+        onClose={() => setSelectedSlide(null)}
+      />
     </div>
   );
 };

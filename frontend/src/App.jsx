@@ -3,10 +3,11 @@ import Logo from "./components/Logo";
 import Upload from "./components/Upload";
 import ScanQueue from "./components/ScanQueue";
 import "./App.css";
+import Header from "./components/Header";
 
 function App() {
   const [slides, setSlides] = useState([]);
-
+  const [activeRole, setActiveRole] = useState(null);
   // Load existing slides on mount
   useEffect(() => {
     loadSlides();
@@ -48,9 +49,7 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <Logo />
-      </header>
+      <Header onRoleSelect={setActiveRole} />
 
       <main>
         <Upload onUploadComplete={handleUploadComplete} />
