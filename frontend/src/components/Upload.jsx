@@ -24,7 +24,7 @@ const Upload = ({ onUploadComplete }) => {
             method: "POST",
             body: formData,
           });
-
+          await new Promise((resolve) => setTimeout(resolve, 600));
           const result = await response.json();
           console.log("Uploaded:", result);
           if (onUploadComplete) onUploadComplete(result);

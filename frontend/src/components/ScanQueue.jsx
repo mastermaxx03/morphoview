@@ -90,7 +90,7 @@ const ScanQueue = ({ slides, setSlides }) => {
   const queuedSlides = slides.filter(
     (s) => s.status === "queued" || s.status === "scanning"
   );
-  const completedSlides = slides.filter((s) => s.status === "complete");
+  const completedSlides = slides.filter((s) => s.status === "completed");
 
   if (slides.length === 0) return null;
 

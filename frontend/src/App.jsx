@@ -4,7 +4,8 @@ import Upload from "./components/Upload";
 import ScanQueue from "./components/ScanQueue";
 import "./App.css";
 import Header from "./components/Header";
-
+import EngineerView from "./components/EngineerView";
+import PathologistView from "./components/PathologistView";
 function App() {
   const [slides, setSlides] = useState([]);
   const [activeRole, setActiveRole] = useState(null);
@@ -21,9 +22,14 @@ function App() {
         file_id: filename.split(".")[0],
         filename: filename,
         saved_as: filename,
-        status: "queued",
-        priority: "normal",
+        status: "completed",
+        priority: "high",
         uploadTime: Date.now() - index * 1000,
+        imageUrl: `http://localhost:8000/uploads/${filename}`,
+        tumorConfidence: (Math.random() * 15 + 85).toFixed(1),
+        wsiQuality: (Math.random() * 15 + 80).toFixed(1),
+        processingTime: (Math.random() * 2 + 1.5).toFixed(2),
+        tissueQuality: (Math.random() * 15 + 80).toFixed(1),
       }));
       setSlides(loadedSlides);
     } catch (error) {
@@ -49,12 +55,18 @@ function App() {
 
   return (
     <div className="app">
-      <Header onRoleSelect={setActiveRole} />
+      <>
+        <Header onRoleSelect={setActiveRole} />
+        {activeRole === "pathologist" && <PathologistView slides={slides} />}
+        {activeRole === "engineer" && <EngineerView slides={slides} />}
+      </>
 
-      <main>
-        <Upload onUploadComplete={handleUploadComplete} />
-        <ScanQueue slides={slides} setSlides={setSlides} />
-      </main>
+      {!activeRole && (
+        <main>
+          <Upload onUploadComplete={handleUploadComplete} />
+          <ScanQueue slides={slides} setSlides={setSlides} />
+        </main>
+      )}
     </div>
   );
 }
