@@ -6,32 +6,52 @@ import "./App.css";
 import Header from "./components/Header";
 import EngineerView from "./components/EngineerView";
 import PathologistView from "./components/PathologistView";
+import {
+  saveSlideMeta,
+  loadSlideMeta,
+  hydrateSlidesWithMeta,
+} from "./lib/storageUtils";
+
 function App() {
   const [slides, setSlides] = useState([]);
   const [activeRole, setActiveRole] = useState(null);
+
   // Load existing slides on mount
   useEffect(() => {
     loadSlides();
   }, []);
 
+  // Save metadata whenever slides change
+  useEffect(() => {
+    if (slides.length > 0) {
+      saveSlideMeta(slides);
+    }
+  }, [slides]);
+
   const loadSlides = async () => {
     try {
       const response = await fetch("http://localhost:8000/slides");
       const data = await response.json();
-      const loadedSlides = data.slides.map((filename, index) => ({
+
+      // Load saved metadata from LocalStorage
+      const savedMeta = loadSlideMeta();
+
+      // Build slides from backend
+      const backendSlides = data.slides.map((filename, index) => ({
         file_id: filename.split(".")[0],
         filename: filename,
         saved_as: filename,
-        status: "completed",
-        priority: "high",
-        uploadTime: Date.now() - index * 1000,
         imageUrl: `http://localhost:8000/uploads/${filename}`,
         tumorConfidence: (Math.random() * 15 + 85).toFixed(1),
         wsiQuality: (Math.random() * 15 + 80).toFixed(1),
         processingTime: (Math.random() * 2 + 1.5).toFixed(2),
         tissueQuality: (Math.random() * 15 + 80).toFixed(1),
       }));
-      setSlides(loadedSlides);
+
+      // Hydrate with saved metadata (priority, status, uploadTime)
+      const hydratedSlides = hydrateSlidesWithMeta(backendSlides, savedMeta);
+
+      setSlides(hydratedSlides);
     } catch (error) {
       console.error("Failed to load slides:", error);
     }
@@ -47,9 +67,14 @@ function App() {
       status: "queued",
       priority: "normal",
       uploadTime: Date.now(),
+      imageUrl: `http://localhost:8000/uploads/${result.saved_as}`,
+      tumorConfidence: (Math.random() * 15 + 85).toFixed(1),
+      wsiQuality: (Math.random() * 15 + 80).toFixed(1),
+      processingTime: (Math.random() * 2 + 1.5).toFixed(2),
+      tissueQuality: (Math.random() * 15 + 80).toFixed(1),
     };
 
-    // Add to state
+    // Add to state (which triggers useEffect to save to LocalStorage)
     setSlides((prevSlides) => [...prevSlides, newSlide]);
   };
 

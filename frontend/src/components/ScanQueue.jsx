@@ -15,7 +15,7 @@ const ScanQueue = ({ slides, setSlides }) => {
       const queued = slides
         .filter((s) => s.status === "queued")
         .sort((a, b) => {
-          const priorityOrder = { urgent: 0, normal: 1, low: 2 };
+          const priorityOrder = { high: 0, normal: 1, low: 2 };
           if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
             return priorityOrder[a.priority] - priorityOrder[b.priority];
           }
@@ -78,7 +78,7 @@ const ScanQueue = ({ slides, setSlides }) => {
   const handlePrioritise = (slideId) => {
     setSlides((prevSlides) =>
       prevSlides.map((s) =>
-        s.file_id === slideId ? { ...s, priority: "urgent" } : s
+        s.file_id === slideId ? { ...s, priority: "high" } : s
       )
     );
   };
@@ -86,12 +86,27 @@ const ScanQueue = ({ slides, setSlides }) => {
   const handleCancel = (slideId) => {
     setSlides((prevSlides) => prevSlides.filter((s) => s.file_id !== slideId));
   };
+  //sorting
+  const sortByPriority = (a, b) => {
+    const priorityOrder = { high: 0, normal: 1, low: 2 };
+    //priority tag
+    if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    }
+    //upload time-secondary key
 
+    return a.uploadTime - b.uploadTime;
+  };
+
+  //  NO sorting (keep original order for progress bar tracking)
   const queuedSlides = slides.filter(
     (s) => s.status === "queued" || s.status === "scanning"
   );
-  const completedSlides = slides.filter((s) => s.status === "completed");
 
+  // Sort by priority + uploadTime
+  const completedSlides = slides
+    .filter((s) => s.status === "completed")
+    .sort(sortByPriority);
   if (slides.length === 0) return null;
 
   return (
@@ -144,11 +159,9 @@ const ScanQueue = ({ slides, setSlides }) => {
                 <button
                   className="action-btn"
                   onClick={() => handlePrioritise(slide.file_id)}
-                  disabled={slide.priority === "urgent"}
+                  disabled={slide.priority === "high"}
                 >
-                  {slide.priority === "urgent"
-                    ? "🔴 Urgent"
-                    : "Prioritise Task"}
+                  {slide.priority === "high" ? "🔴 Urgent " : "Prioritise Task"}
                 </button>
                 <button
                   className="action-btn cancel"
@@ -180,7 +193,7 @@ const ScanQueue = ({ slides, setSlides }) => {
 
                 {/* Priority Badge */}
                 <span className={`priority-badge priority-${slide.priority}`}>
-                  {slide.priority === "urgent" && "🔴 URGENT"}
+                  {slide.priority === "high" && "🔴 URGENT"}
                   {slide.priority === "normal" && "🟡 NORMAL"}
                   {slide.priority === "low" && "🟢 LOW"}
                 </span>
