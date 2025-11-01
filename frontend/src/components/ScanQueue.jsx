@@ -51,7 +51,7 @@ const ScanQueue = ({ slides, setSlides }) => {
             setSlides((prevSlides) =>
               prevSlides.map((s) =>
                 s.file_id === currentlyScanning
-                  ? { ...s, status: "complete" }
+                  ? { ...s, status: "completed" }
                   : s
               )
             );
