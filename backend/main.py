@@ -13,6 +13,7 @@ from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 from pydantic import BaseModel
+import pyvips
 
 class MetadataUpdate(BaseModel):
     priority: str = "normal"
@@ -31,8 +32,10 @@ app.add_middleware(
 
 UPLOAD_FOLDER = "uploads"
 HEATMAP_FOLDER = "heatmaps"
+TILES_FOLDER = "tiles"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(HEATMAP_FOLDER, exist_ok=True)
+os.makedirs(TILES_FOLDER, exist_ok=True)
 METADATA_FILE = "slides_metadata.json"
 # model
 print("Loading ResNet50 model...")
@@ -49,10 +52,22 @@ def load_metadata():
 def save_metadata(metadata):
     with open(METADATA_FILE, "w") as f:
         json.dump(metadata, f, indent=2)    
-
+def generate_tiles(input_path:str,output_id:str):
+    """Convert Flat image to deep zoom tiles using pyvips."""
+    output_path=os.path.join(TILES_FOLDER,output_id)
+    try:
+        image=pyvips.Image.new_from_file(input_path)
+        image.dzsave(output_path,tile_size=256,layout="dz")
+        print(f"Tiling successful for {output_id}")
+        return True
+        
+    except Exception as e:
+        print(f"Error generating tiles for {input_path}: {e}")
+        return None
 # Serve uploaded files
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/heatmaps", StaticFiles(directory="heatmaps"), name="heatmaps")
+app.mount("/tiles", StaticFiles(directory="tiles"), name="tiles")
 
 @app.post("/upload")
 async def upload_slide(file: UploadFile = File(...)):
@@ -64,11 +79,13 @@ async def upload_slide(file: UploadFile = File(...)):
     file_path = os.path.join(UPLOAD_FOLDER, saved_filename)
     with open(file_path, "wb") as f:
         f.write(await file.read())
+    tile_success=generate_tiles(file_path,file_id)
     
     return {
         "file_id": file_id,
         "filename": file.filename,
-        "saved_as": saved_filename,  # Frontend needs this
+        "saved_as": saved_filename,  
+        "tiled": tile_success
     }
 
 @app.get("/slides")
@@ -87,7 +104,20 @@ async def delete_slide(file_id: str):
             if file.startswith(file_id):
                 file_path = os.path.join(UPLOAD_FOLDER, file)
                 os.remove(file_path)
+                heatmap_file = os.path.join(HEATMAP_FOLDER, f"{file_id}_heatmap.png")
+                if os.path.exists(heatmap_file):
+                    os.remove(heatmap_file)
+
+                # 3. Delete its tile folder and .dzi file
+                tile_dir = os.path.join(TILES_FOLDER, f"{file_id}_files")
+                dzi_file = os.path.join(TILES_FOLDER, f"{file_id}.dzi")
+                if os.path.exists(tile_dir):
+                    import shutil
+                    shutil.rmtree(tile_dir)
+                if os.path.exists(dzi_file):
+                    os.remove(dzi_file)
                 return {"success": True, "message": f"Deleted {file}"}
+            
         
         return {"success": False, "message": "File not found"}
     except Exception as e:
@@ -125,7 +155,16 @@ async def get_metadata(file_id: str):
             return {"priority":"normal","status":"queued","uploadTime":int(time.time()*1000)}
     except Exception as e:
         return {"error": str(e)}
-        
+    
+@app.get("/slides/metadata/all")
+async def get_all_metadata():
+    """Get metadata for all slides"""
+    try:
+        metadata = load_metadata()
+        return metadata
+    except Exception as e:
+        print(f"Error loading all metadata: {e}")
+        return {"error": str(e)}        
 @app.post("/predict")
 async def predict(file_id: str):
     """
