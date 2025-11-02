@@ -1,47 +1,47 @@
-// Storage helper - saves and loads slide metadata from LocalStorage
+// No more localStorage! Use backend API instead
 
-const STORAGE_KEY = "morphoview:slidesMeta";
-
-// Save metadata for all slides
-export const saveSlideMeta = (slides) => {
-  const metadata = {};
-
-  slides.forEach((slide) => {
-    metadata[slide.file_id] = {
-      priority: slide.priority,
-      status: slide.status,
-      uploadTime: slide.uploadTime,
-    };
-  });
-
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(metadata));
-  } catch (error) {
-    console.error("Failed to save slide metadata:", error);
+export async function saveSlideMeta(slides) {
+  /**
+   * When slide priority/status changes, save to backend
+   */
+  for (const slide of slides) {
+    try {
+      await fetch(`http://localhost:8000/slides/${slide.file_id}/metadata`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          priority: slide.priority,
+          status: slide.status,
+        }),
+      });
+    } catch (error) {
+      console.error(`Failed to save metadata for ${slide.file_id}:`, error);
+    }
   }
-};
+}
 
-// Load metadata from LocalStorage
-export const loadSlideMeta = () => {
+export async function loadSlideMeta() {
+  /**
+   * Load all metadata from backend
+   * (Not used directly, loaded in App.jsx instead)
+   */
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : {};
+    const response = await fetch("http://localhost:8000/slides/metadata/all");
+    return await response.json();
   } catch (error) {
-    console.error("Failed to load slide metadata:", error);
+    console.error("Failed to load metadata:", error);
     return {};
   }
-};
+}
 
-// Merge backend slides with saved metadata
-export const hydrateSlidesWithMeta = (backendSlides, savedMeta) => {
-  return backendSlides.map((slide, index) => {
-    const saved = savedMeta[slide.file_id];
-
-    return {
-      ...slide,
-      priority: saved?.priority || "normal",
-      status: saved?.status || "completed",
-      uploadTime: saved?.uploadTime || Date.now() - index * 1000,
-    };
-  });
-};
+export function hydrateSlidesWithMeta(backendSlides, savedMeta) {
+  /**
+   * Merge backend slide data with metadata
+   */
+  return backendSlides.map((slide) => ({
+    ...slide,
+    priority: savedMeta[slide.file_id]?.priority || "normal",
+    status: savedMeta[slide.file_id]?.status || "queued",
+    uploadTime: savedMeta[slide.file_id]?.uploadTime || Date.now(),
+  }));
+}

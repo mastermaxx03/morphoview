@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import ImagePreviewModal from "./ImagePreviewModal";
-
+import { saveSlideMeta } from "../lib/storageUtils";
 import "./ScanQueue.css";
 
 const ScanQueue = ({ slides, setSlides }) => {
@@ -48,15 +48,27 @@ const ScanQueue = ({ slides, setSlides }) => {
             clearInterval(progressTimer);
 
             // Mark as complete
-            setSlides((prevSlides) =>
-              prevSlides.map((s) =>
-                s.file_id === currentlyScanning
-                  ? { ...s, status: "completed" }
-                  : s
-              )
-            );
-            setCurrentlyScanning(null);
-            return 0;
+            if (prev >= 100) {
+              clearInterval(progressTimer);
+
+              // Mark as complete
+              setSlides((prevSlides) => {
+                const updatedSlides = prevSlides.map((s) =>
+                  s.file_id === currentlyScanning
+                    ? { ...s, status: "completed" }
+                    : s
+                );
+                const justCompleted = updatedSlides.find(
+                  (s) => s.file_id === currentlyScanning
+                );
+                if (justCompleted) {
+                  saveSlideMeta([justCompleted]); // 👈 Persist completed status for refresh!
+                }
+                return updatedSlides;
+              });
+              setCurrentlyScanning(null);
+              return 0;
+            }
           }
           return prev + 1.15;
         });

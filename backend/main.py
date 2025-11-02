@@ -6,6 +6,19 @@ import uuid
 import json
 from pathlib import Path
 import time
+import torch
+import torchvision.transforms as transforms
+from torchcam.methods import GradCAM
+from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
+from pydantic import BaseModel
+
+class MetadataUpdate(BaseModel):
+    priority: str = "normal"
+    status: str = "queued"
+
+
 app = FastAPI()
 
 app.add_middleware(
@@ -19,6 +32,13 @@ app.add_middleware(
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 METADATA_FILE = "slides_metadata.json"
+# model
+print("Loading ResNet50 model...")
+MODEL = torch.hub.load('pytorch/vision:v0.10.0', 'resnet50', pretrained=True)
+MODEL.eval()
+print("Model loaded!")
+
+DEVICE = "cpu"
 def load_metadata():
     if not os.path.exists(METADATA_FILE):
         return {}
@@ -71,17 +91,23 @@ async def delete_slide(file_id: str):
         return {"success": False, "message": str(e)}
 # Additional endpoints for managing metadata
 @app.post("/slides/{file_id}/metadata")
-async def update_metadata(file_id: str, priority: str="normal" ,status: str="queued"):
-    """update slide metadata (priority,status)"""
-    try :
-        metadata=load_metadata()
+async def update_metadata(file_id: str, data: MetadataUpdate):
+    """Update slide metadata"""
+    try:
+        metadata = load_metadata()
+        
         if file_id not in metadata:
-            metadata[file_id]={}
-        metadata[file_id]['priority']=priority
-        metadata[file_id]['status']=status
-        metadata[file_id]['uploadTime']=int(time.time()*1000)
+            metadata[file_id] = {}
+        
+        # Use data.priority and data.status
+        metadata[file_id]['priority'] = data.priority
+        metadata[file_id]['status'] = data.status
+        if 'uploadTime' not in metadata[file_id]:
+            metadata[file_id]['uploadTime'] = int(time.time() * 1000)
+        
         save_metadata(metadata)
         return {"success": True, "metadata": metadata[file_id]}
+    
     except Exception as e:
         return {"success": False, "message": str(e)}
     
@@ -104,4 +130,142 @@ async def get_all_metadata():
         metadata=load_metadata()
         return metadata
     except Exception as e:
-        return {"error": str(e)}        
+        return {"error": str(e)}  
+
+@app.post("/predict")
+async def predict(file_id: str):
+    """
+    Run ResNet50 inference on image.
+    
+    Input: file_id (UUID of uploaded image)
+    Output: {boxes, heatmap_url, model_info, qc_metrics}
+    """
+    try:
+        # 1. Find image file
+        image_filename = None
+        for file in os.listdir(UPLOAD_FOLDER):
+            if file.startswith(file_id):
+                image_filename = file
+                break
+        
+        if not image_filename:
+            return {"error": f"File {file_id} not found"}
+        
+        image_path = os.path.join(UPLOAD_FOLDER, image_filename)
+        
+        # 2. Load image
+        image = Image.open(image_path).convert('RGB')
+        image_np = np.array(image)
+        image_width, image_height = image.size 
+        transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225]
+            )
+        ])
+        
+        image_tensor = transform(image).unsqueeze(0).to(DEVICE)
+        
+        # 4. Run inference
+        cam_extractor = GradCAM(MODEL, target_layer='layer4')
+        
+        # 5. Generate Grad-CAM heatmap
+        
+        # ❌ CRITICAL FIX: Do NOT use torch.no_grad() here.
+        # Grad-CAM needs the computation graph to calculate gradients.
+        output = MODEL(image_tensor)
+
+        # Get probabilities and confidence from the output
+        # Use torch.nn.functional.softmax
+        probabilities = torch.nn.functional.softmax(output, dim=1)
+        
+        # Get the top predicted class index
+        class_index = output.squeeze(0).argmax().item()
+        
+        # ✅ IMPROVEMENT: Get confidence for the *actual* predicted class
+        confidence = probabilities[0, class_index].item() 
+        
+        # Pass the 'output' tensor as the 'scores' argument
+        activation_map_list = cam_extractor(class_idx=class_index, scores=output)
+
+        # Manually release the hooks
+        cam_extractor.remove_hooks()
+
+        # 6. Extract and process heatmap
+        # ✅ NOW we can use torch.no_grad() for post-processing
+        #    to save memory, as we're done with gradients.
+        with torch.no_grad():
+            activation_map = activation_map_list[0].cpu()
+            
+            # Resize heatmap to original image size
+            heatmap_resized = torch.nn.functional.interpolate(
+                activation_map.unsqueeze(0).unsqueeze(0), 
+                size=(image_height, image_width),
+                mode='bilinear',
+                align_corners=False
+            )
+            
+            heatmap_np = heatmap_resized.squeeze().numpy()
+            heatmap_normalized = (heatmap_np - heatmap_np.min()) / (heatmap_np.max() - heatmap_np.min() + 1e-8)
+                    
+            #convert to colored heatmap
+            heatmap_colored = plt.cm.hot(heatmap_normalized)
+            heatmap_rgb = (heatmap_colored[:, :, :3] * 255).astype(np.uint8)
+            heatmap_pil = Image.fromarray(heatmap_rgb)
+        
+        # 7. Save heatmap
+        heatmap_filename = f"{file_id}_heatmap.png"
+        heatmap_path = os.path.join(UPLOAD_FOLDER, heatmap_filename)
+        heatmap_pil.save(heatmap_path)
+        
+        # 8. Mock boxes (for now, hardcoded positions)
+        boxes = [
+            {
+                "x": int(image_width * 0.1),
+                "y": int(image_height * 0.1),
+                "width": int(image_width * 0.2),
+                "height": int(image_height * 0.15),
+                "confidence": 0.87
+            },
+            {
+                "x": int(image_width * 0.6),
+                "y": int(image_height * 0.5),
+                "width": int(image_width * 0.25),
+                "height": int(image_height * 0.3),
+                "confidence": 0.75
+            }
+        ]
+        
+        # 9. Mock QC metrics
+        qc_metrics = {
+            "tissue_quality": 0.85,
+            "blur_score": 0.15,
+            "contrast": 0.82,
+            "tumors_detected": len(boxes),
+            "avg_confidence": 0.81
+        }
+        
+        model_info = {
+            "model": "ResNet50",
+            "confidence": round(confidence, 2), # This will now be correct
+            "processing_time": "2.3s" # This is mocked, which is fine
+        }
+        
+        # 10. Return response
+        return {
+            "success": True,
+            "boxes": boxes,
+            "heatmap": f"/uploads/{heatmap_filename}",
+            "model_info": model_info,
+            "qc_metrics": qc_metrics,
+            "image_size": {"width": image_width, "height": image_height}
+        }
+    
+    except Exception as e:
+        # It's also good practice to print the error to your server logs
+        print(f"Error in /predict: {e}") 
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}

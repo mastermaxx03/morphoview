@@ -22,11 +22,6 @@ function App() {
   }, []);
 
   // Save metadata whenever slides change
-  useEffect(() => {
-    if (slides.length > 0) {
-      saveSlideMeta(slides);
-    }
-  }, [slides]);
 
   const loadSlides = async () => {
     try {
@@ -34,10 +29,13 @@ function App() {
       const data = await response.json();
 
       // Load saved metadata from LocalStorage
-      const savedMeta = loadSlideMeta();
+      const metadataResponse = await fetch(
+        "http://localhost:8000/slides/metadata/all"
+      );
+      const savedMeta = await metadataResponse.json();
 
       // Build slides from backend
-      const backendSlides = data.slides.map((filename, index) => ({
+      const backendSlides = data.slides.map((filename) => ({
         file_id: filename.split(".")[0],
         filename: filename,
         saved_as: filename,
@@ -76,6 +74,7 @@ function App() {
 
     // Add to state (which triggers useEffect to save to LocalStorage)
     setSlides((prevSlides) => [...prevSlides, newSlide]);
+    saveSlideMeta([newSlide]);
   };
 
   return (
