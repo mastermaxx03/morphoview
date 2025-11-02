@@ -39,44 +39,76 @@ const ScanQueue = ({ slides, setSlides }) => {
     return () => clearInterval(timer);
   }, [slides, currentlyScanning, setSlides]);
 
+  //maki api call to resnet50 and show scan animation
   useEffect(() => {
     if (currentlyScanning) {
-      setScanProgress(0);
-      const progressTimer = setInterval(() => {
-        setScanProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(progressTimer);
-
-            // Mark as complete
+      const slideId = currentlyScanning;
+      //animation progress
+      const animationPromise = new Promise((resolve) => {
+        setScanProgress(0);
+        const progressTimer = setInterval(() => {
+          setScanProgress((prev) => {
             if (prev >= 100) {
               clearInterval(progressTimer);
-
-              // Mark as complete
-              setSlides((prevSlides) => {
-                const updatedSlides = prevSlides.map((s) =>
-                  s.file_id === currentlyScanning
-                    ? { ...s, status: "completed" }
-                    : s
-                );
-                const justCompleted = updatedSlides.find(
-                  (s) => s.file_id === currentlyScanning
-                );
-                if (justCompleted) {
-                  saveSlideMeta([justCompleted]); // 👈 Persist completed status for refresh!
-                }
-                return updatedSlides;
-              });
-              setCurrentlyScanning(null);
-              return 0;
+              resolve();
+              return 100;
             }
-          }
-          return prev + 1.15;
-        });
-      }, 80);
+            return prev + 5;
+          });
+        }, 80);
+      });
+      const predictPromise = fetch(
+        `http://localhost:8000/predict?file_id=${slideId}`,
+        {
+          method: "POST",
+        }
+      ).then((res) => res.json());
 
-      return () => clearInterval(progressTimer);
+      Promise.all([animationPromise, predictPromise])
+        .then(([animationResult, data]) => {
+          // Both are done. Now we check the AI result.
+          if (data.success) {
+            console.log("Prediction complete:", data);
+            setSlides((prevSlides) =>
+              prevSlides.map((s) =>
+                s.file_id === slideId
+                  ? {
+                      ...s,
+                      status: "completed",
+                      heatmapUrl: data.heatmap,
+                      model_info: data.model_info,
+                      qc_metrics: data.qc_metrics,
+                    }
+                  : s
+              )
+            );
+          } else {
+            // Handle AI prediction failure
+            console.error("Prediction failed:", data.error);
+            setSlides((prevSlides) =>
+              prevSlides.map((s) =>
+                s.file_id === slideId ? { ...s, status: "failed" } : s
+              )
+            );
+          }
+        })
+        .catch((err) => {
+          // Handle network or other errors
+          console.error("Prediction or animation error:", err);
+          setSlides((prevSlides) =>
+            prevSlides.map((s) =>
+              s.file_id === slideId ? { ...s, status: "failed" } : s
+            )
+          );
+        })
+        .finally(() => {
+          // Reset scanner for the next slide
+          setCurrentlyScanning(null);
+          setScanProgress(0);
+        });
     }
   }, [currentlyScanning, setSlides]);
+
   const handleDelete = (slideId) => {
     fetch(`http://localhost:8000/upload/${slideId}`, { method: "DELETE" })
       .then((res) => res.json())

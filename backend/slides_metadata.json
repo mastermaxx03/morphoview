@@ -1,8 +1,21 @@
 {
   "2be8b8c4-c275-48dd-bd67-7493a3985216": {
-    "priority": "high",
+    "priority": "normal",
     "status": "completed",
-    "uploadTime": 1762011621573
+    "uploadTime": 1762011621573,
+    "heatmapUrl": "/heatmaps/2be8b8c4-c275-48dd-bd67-7493a3985216_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 0.41,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
   },
   "abc123": {
     "priority": "high",
@@ -10,38 +23,201 @@
     "uploadTime": 1762012570418
   },
   "eaaaf5c3-2d58-4e9b-a1d2-f6f33644f33e": {
-    "priority": "high",
+    "priority": "normal",
     "status": "completed",
-    "uploadTime": 1762019160051
+    "uploadTime": 1762019160051,
+    "heatmapUrl": "/heatmaps/eaaaf5c3-2d58-4e9b-a1d2-f6f33644f33e_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 0.73,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
   },
   "5df3baaf-e854-459e-9427-ba91164a73ef": {
     "priority": "normal",
     "status": "completed",
-    "uploadTime": 1762062265943
+    "uploadTime": 1762062265943,
+    "heatmapUrl": "/heatmaps/5df3baaf-e854-459e-9427-ba91164a73ef_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 0.96,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
   },
   "7aa808a2-d932-4fc8-81dc-c6ce5d94b722": {
     "priority": "high",
     "status": "completed",
-    "uploadTime": 1762062274508
+    "uploadTime": 1762062274508,
+    "heatmapUrl": "/heatmaps/7aa808a2-d932-4fc8-81dc-c6ce5d94b722_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 0.93,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
   },
   "332b2773-5591-4269-ad0b-c5e9503432b6": {
     "priority": "high",
     "status": "completed",
-    "uploadTime": 1762062283093
+    "uploadTime": 1762062283093,
+    "heatmapUrl": "/heatmaps/332b2773-5591-4269-ad0b-c5e9503432b6_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 0.92,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
   },
   "65ad0fe7-0b63-419b-b63a-08d2e90bae07": {
     "priority": "normal",
     "status": "completed",
-    "uploadTime": 1762062292730
+    "uploadTime": 1762062292730,
+    "heatmapUrl": "/heatmaps/65ad0fe7-0b63-419b-b63a-08d2e90bae07_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 1.0,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
   },
   "ce4d5aa5-c320-4d41-8bcb-82bb138fd011": {
     "priority": "normal",
     "status": "completed",
-    "uploadTime": 1762062301295
+    "uploadTime": 1762062301295,
+    "heatmapUrl": "/heatmaps/ce4d5aa5-c320-4d41-8bcb-82bb138fd011_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 0.2,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
   },
   "01e710f4-cf7c-4d85-87a8-724938382bae": {
     "priority": "normal",
     "status": "completed",
-    "uploadTime": 1762062309875
+    "uploadTime": 1762062309875,
+    "heatmapUrl": "/heatmaps/01e710f4-cf7c-4d85-87a8-724938382bae_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 1.0,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
+  },
+  "72d6ad3e-dd80-4a93-8db4-a7c3defb2eed": {
+    "priority": "normal",
+    "status": "completed",
+    "uploadTime": 1762063879091,
+    "heatmapUrl": "/heatmaps/72d6ad3e-dd80-4a93-8db4-a7c3defb2eed_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 0.62,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
+  },
+  "6ac6d687-0057-4474-b477-17852632c88e": {
+    "priority": "normal",
+    "status": "completed",
+    "uploadTime": 1762063905081,
+    "heatmapUrl": "/heatmaps/6ac6d687-0057-4474-b477-17852632c88e_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 0.99,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
+  },
+  "4dcd5de4-bd27-47e3-9694-0f4fa7c54269": {
+    "priority": "normal",
+    "status": "completed",
+    "uploadTime": 1762063928198,
+    "heatmapUrl": "/heatmaps/4dcd5de4-bd27-47e3-9694-0f4fa7c54269_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 0.73,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
+  },
+  "2be8b8c4-c275-48dd-bd67-7493a3985216_heatmap": {
+    "priority": "normal",
+    "status": "completed",
+    "uploadTime": 1762067557595,
+    "heatmapUrl": "/heatmaps/2be8b8c4-c275-48dd-bd67-7493a3985216_heatmap_heatmap.png",
+    "model_info": {
+      "model": "ResNet50",
+      "confidence": 0.56,
+      "processing_time": "2.3s"
+    },
+    "qc_metrics": {
+      "tissue_quality": 0.85,
+      "blur_score": 0.15,
+      "contrast": 0.82,
+      "tumors_detected": 2,
+      "avg_confidence": 0.81
+    }
   }
 }

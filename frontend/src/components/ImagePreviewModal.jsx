@@ -1,7 +1,7 @@
 import "./ImagePreviewModal.css";
 
 const ImagePreviewModal = ({ slide, isOpen, onClose }) => {
-  if (!isOpen) return null;
+  if (!isOpen || !slide) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -10,22 +10,40 @@ const ImagePreviewModal = ({ slide, isOpen, onClose }) => {
           ✕
         </button>
 
+        <h2>{slide.filename}</h2>
+
         <div className="preview-container">
-          <img
-            src={`http://localhost:8000/uploads/${slide.saved_as}`}
-            alt={slide.filename}
-            className="preview-image"
-          />
+          {/* Original Image */}
+          <div className="image-section">
+            <h3>Original Slide</h3>
+            <img src={slide.imageUrl} alt="Original" />
+          </div>
+
+          {/* Heatmap Overlay */}
+          <div className="image-section">
+            <h3>AI Analysis (Heatmap)</h3>
+            <img
+              src={`http://localhost:8000${slide.heatmapUrl}`}
+              alt="Heatmap"
+              className="preview-image" // You can reuse this class
+            />
+          </div>
         </div>
 
-        <div className="preview-info">
-          <h2>{slide.filename}</h2>
+        {/* Metrics */}
+        <div className="metrics">
           <p>
-            Status: <span className="status-badge">✓ Complete</span>
+            <strong>Model Confidence:</strong> {slide.tumorConfidence}%
           </p>
-          <button className="close-modal-btn" onClick={onClose}>
-            Close
-          </button>
+          <p>
+            <strong>Tissue Quality:</strong> {slide.tissueQuality}%
+          </p>
+          <p>
+            <strong>Processing Time:</strong> {slide.processingTime}s
+          </p>
+          <p>
+            <strong>Priority:</strong> {slide.priority?.toUpperCase()}
+          </p>
         </div>
       </div>
     </div>

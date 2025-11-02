@@ -24,13 +24,16 @@ export default function PathologistViewer({ slide, onBack }) {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const viewer = OSDViewer.Viewer({
+    const viewer = OSDViewer({
+      // Your fix from last time is here
       element: containerRef.current,
       prefixUrl: "https://openseadragon.github.io/build/openseadragon/images/",
-      tileSources: {
-        type: "image",
-        url: slide.imageUrl,
-      },
+
+      // --- THIS IS THE NEW DEMO IMAGE ---
+      // This is a real, tiled Whole Slide Image (demo)
+      tileSources:
+        "https://openseadragon.github.io/example-images/duomo/duomo.dzi",
+      // ---
     });
 
     viewer.addOnceHandler("open", () => {

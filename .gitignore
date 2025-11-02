@@ -20,3 +20,8 @@ backend/uploads/
 __pycache__/
 *.pyc
 .DS_Store
+# Ignore uploaded slides
+uploads/
+
+# Ignore generated heatmaps
+heatmaps/
