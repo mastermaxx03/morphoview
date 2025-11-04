@@ -26,3 +26,4 @@ uploads/
 # Ignore generated heatmaps
 heatmaps/
 tiles/
+slides_metadata.json
